@@ -8,6 +8,12 @@ ApplicationWindow
 {
     id: window;
     property int currentPokédex
+    property string coverMode: "default"
+
+    // CoverMode: pokémon:
+    property var coverPokémon
+
+    // Models
     ListModel {
         id: pokémonList
         //dynamicRoles: true;
@@ -29,34 +35,27 @@ ApplicationWindow
 
 
     initialPage: Component { PokémonListPage { } }
-    cover: Qt.resolvedUrl("cover/CoverPage.qml")
-    allowedOrientations: defaultAllowedOrientations
-
-    /* WorkerScript {
-        id: pokéApi
-        source: "js/api.js"
-        function loadList() {
-            console.log(pokémonList);
-            pokéApi.sendMessage({
-                    "type": "MODEL",
-                    "modelType": "POKÉMON_LIST",
-                    "model": pokémonList
-                });
+    cover: {
+        switch(coverMode) {
+        case "pokémon":
+            return Qt.resolvedUrl("cover/PokémonCoverPage.qml")
+        case "default":
+            return Qt.resolvedUrl("cover/CoverPage.qml")
+        default: //fallthrough
+            console.warn("invalid coverMode")
         }
+    }
+    allowedOrientations: Orientation.All
 
-        function requestPokémon(id) {
-            pokéApi.sendMessage({
-                    "type": "LOAD_POKÉMON",
-                    "id": id
-                });
-        }
-    } */
     Python {
         id: pokéApi
         function loadList() {}
         function requestPokémon(id) {}
         function requestPokémonDescription(id, callback) {
-            call("PokéApi.fetchPokémonDescription", [id, 18], callback)
+            call("PokéApi.fetchPokémonDescription", [id, 18], callback);
+        }
+        function requestPokémonEvolution(id, callback) {
+            call("PokéApi.fetchEvolutionChain", [id], callback);
         }
         function loadPokédex(id) {
             call("PokéApi.loadPokédex", [id], function(){})
@@ -77,7 +76,15 @@ ApplicationWindow
             setHandler("POKÉDEXES_MODEL_SET", function(data){
                 pokédexesList.set(data.index, data);
             });
+            setHandler("POKÉDEX_SELECT", function(pokédex) {
+                currentPokédex = pokédex
+            });
+            setHandler("LOG", function(message) {
+                console.log("Python: " + message)
+            });
             call("PokéApi.initialise", function(){})
         }
+
     }
+    onCurrentPokédexChanged: pokéApi.loadPokédex(currentPokédex)
 }

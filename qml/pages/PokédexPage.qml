@@ -15,7 +15,6 @@ Page {
 
             ComboBox {
                 label: qsTr("Pokédex")
-                currentIndex: 0
                 menu: ContextMenu {
                     Repeater {
                         model: pokédexesList
@@ -24,9 +23,17 @@ Page {
                         }
                     }
                 }
-                onCurrentIndexChanged: pokéApi.loadPokédex(pokédexesList.get(currentIndex).id)
                 description: pokédexesList.get(currentIndex).description
+                onCurrentIndexChanged: window.currentPokédex = pokédexesList.get(currentIndex).id
+                Component.onCompleted: {
+                    for (var i = 0; i < pokédexesList.count; i++) {
+                        if (pokédexesList.get(i).id === currentPokédex) {
+                            currentIndex = i
+                        }
+                    }
+                }
             }
+
         }
     }
 }

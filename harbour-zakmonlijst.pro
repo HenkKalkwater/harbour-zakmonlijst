@@ -32,7 +32,11 @@ DISTFILES += qml/harbour-zakmonlijst.qml \
     qml/pages/PokédexPage.qml \
     qml/cover/TypeBadge.qml \
     rpm/harbour-zakmonlijst.changes.run.in \
-    rpm/harbour-zakmonlijst.spec
+    rpm/harbour-zakmonlijst.spec \
+    qml/cover/PokémonCoverPage.qml \
+    qml/components/Evolution.qml \
+    qml/components/ClickablePokémon.qml \
+    qml/components/EvolutionPart.qml
     qml/sprites/*.png
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172

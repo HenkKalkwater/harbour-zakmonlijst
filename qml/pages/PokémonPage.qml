@@ -16,6 +16,8 @@ Page {
         anchors.fill: parent
         contentHeight: content.height
 
+        VerticalScrollDecorator {}
+
         Column {
             id: content
             width: parent.width
@@ -88,13 +90,17 @@ Page {
                 Behavior on height {
                     NumberAnimation { duration: 100 }
                 }
-                width: parent.width
-                leftPadding: Theme.horizontalPageMargin
-                rightPadding: Theme.horizontalPageMargin
+                anchors.left: parent.left
+                anchors.leftMargin: Theme.horizontalPageMargin
+                anchors.rightMargin: Theme.horizontalPageMargin
+                anchors.right: parent.right
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: Theme.highlightColor
 
                 Component.onCompleted: {
                     pokéApi.requestPokémonDescription(pokémon.id, function(response) {
-                        text = response
+                        // Replace newlines and let QT wrap things automatically
+                        text = response.replace(/\n/g, " ")
                     })
                 }
 
@@ -110,10 +116,9 @@ Page {
                 currentIndex: 0
                 ExpandingSection {
                     title: qsTr("Evolution")
-                    content.sourceComponent: Column {
-                        Label {
-                            text: "TODO"
-                        }
+                    content.sourceComponent: Evolution {
+                            width: parent.width
+                            pokémon: pokémonPage.pokémon
                      }
                  }
                 ExpandingSection {
@@ -125,6 +130,12 @@ Page {
                     }
                 }
             }
+        }
+    }
+    onStatusChanged: {
+        if (status === PageStatus.Activating) {
+            window.coverMode = "pokémon"
+            window.coverPokémon = pokémon
         }
     }
     Component.onCompleted: if(!pokémon.expanded) pokéApi.requestPokémon(pokémon.id)

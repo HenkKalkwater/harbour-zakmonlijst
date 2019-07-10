@@ -2,7 +2,9 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Rectangle {
+    // The type identifier, used to determine the colour of the badge
     property string typeAbbr: ""
+    // The actual text shown on the badge, should be localized
     property alias typeName: badgeText.text
     width: badgeText.width + 2 * Theme.paddingMedium
     height: badgeText.height + 2 * Theme.paddingMedium

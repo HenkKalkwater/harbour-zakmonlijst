@@ -4,8 +4,36 @@
 <context>
     <name>CoverPage</name>
     <message>
-        <source>My Cover</source>
-        <translation>Mein Cover</translation>
+        <source>Pokédex</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Evolution</name>
+    <message>
+        <source>This pokémon has no evolutions</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>EvolutionPart</name>
+    <message>
+        <source>with happiness &gt; %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>by leveling up%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>at level %1%2</source>
+        <extracomment>The level the Pokémon evolves at, shown under an arrow indicating evolution</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>use %1%2</source>
+        <extracomment>Item used to evolve the Pokémon</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

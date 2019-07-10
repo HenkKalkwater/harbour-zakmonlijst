@@ -45,8 +45,13 @@ Page {
     }
 
     onStatusChanged: {
-        if (status == PageStatus.Active) {
+        switch(status) {
+        case PageStatus.Activating:
+            window.coverMode = "default";
+            break;
+        case PageStatus.Active:
             pageStack.pushAttached(Qt.resolvedUrl("PokédexPage.qml"))
+            break;
         }
     }
 
