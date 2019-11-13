@@ -35,6 +35,16 @@
         <extracomment>Item used to evolve the Pokémon</extracomment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>at day</source>
+        <extracomment>The time an evolution should occur</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>at night</source>
+        <extracomment>The time an evolution should occur</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FirstPage</name>

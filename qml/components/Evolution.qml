@@ -13,11 +13,11 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         text: qsTr("This pokémon has no evolutions")
         color: Theme.highlightColor
-        visible: prevolution == null && evolutions.count == 0
+        visible: prevolution === null && evolutions.count === 0
     }
 
     EvolutionPart {
-        visible: prevolution != null
+        visible: prevolution !== undefined
         from: prevolution
         to: pokémon
         evolution: prevolution.evolution
@@ -35,7 +35,7 @@ Column {
     Component.onCompleted: {
         pokéApi.requestPokémonEvolution(pokémon.id, function(result) {
             console.log(JSON.stringify(result))
-            if (result.prevolution != null) {
+            if (result.prevolution !== null) {
                 evolution.prevolution = result.prevolution
             }
             evolution.evolutions = result.evolutions

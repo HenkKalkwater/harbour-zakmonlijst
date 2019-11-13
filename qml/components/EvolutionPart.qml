@@ -8,8 +8,8 @@ Item {
 
     id: evolutionPart
     height: Math.max(evolutionPreClick.height, evolutionPostClick.height)
-    width: evolutionPreClick.width + evolveArrowContainer.width
-           + evolutionPostClick.width + 2 * Theme.paddingMedium
+    //width: evolutionPreClick.width + evolveArrowContainer.width
+           //+ evolutionPostClick.width + 2 * Theme.paddingMedium
     anchors.left: parent.left
     anchors.right: parent.right
     // Prevolution

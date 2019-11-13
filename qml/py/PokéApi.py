@@ -8,6 +8,7 @@ import os
 import time
 
 # Setup sqlite
+#TODO: remove hardcoded path
 con = sqlite3.connect("/usr/share/harbour-zakmonlijst/qml/data/database.sqlite");
 con.row_factory = sqlite3.Row
 
@@ -41,6 +42,35 @@ def fetchPokémonDescription(id, gameId):
                        AND psft.version_id = ?
                        AND psft.language_id = ?''', (id, gameId, preferred_language_id))
     return c.fetchone()["flavor_text"]
+
+def fetchPokémon(id):
+    global pokédex
+    global preferred_language_id
+    c = con.cursor()
+    c.execute('''SELECT ps.id, psn.name, psn.genus, p.weight, p.height, GROUP_CONCAT(pt.type_id) AS types
+                 FROM pokemon_species AS ps
+                 JOIN pokemon_species_names AS psn ON ps.id = psn.pokemon_species_id
+                                                  AND psn.local_language_id  = ?
+                 JOIN pokemon AS p ON ps.id = p.species_id AND p.is_default = 1
+                 JOIN pokemon_types AS pt ON pt.pokemon_id = p.species_id
+                 WHERE ps.id=?
+                 GROUP BY ps.id
+                 ORDER BY pt.slot ASC''', (preferred_language_id, id));
+    row = c.fetchone()
+    typesTmp = row["types"].split(',')
+    types = []
+    for type in typesTmp:
+        types.append({"id": int(type)})
+    return {
+        # "index": row["id"],
+        "id": row["id"],
+        "name": row["name"],
+        "genus": row["genus"],
+        "weight": row["weight"],
+        "height": row["height"],
+        "types": types
+    }
+
 
 def loadPokédex(id):
     global pokédex

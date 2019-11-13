@@ -28,5 +28,10 @@ BackgroundItem {
             text: pokémon.name
         }
     }
-    onClicked: pageStack.push(Qt.resolvedUrl("../pages/PokémonPage.qml"), { "pokémon": pokémonList.get(pokémon.id - 1) })
+    onClicked: {
+        pokéApi.requestPokémon(pokémon.id, function(newPokémon) {
+            pageStack.push(Qt.resolvedUrl("../pages/PokémonPage.qml"),
+                           { "pokémon": newPokémon })
+        })
+    }
 }

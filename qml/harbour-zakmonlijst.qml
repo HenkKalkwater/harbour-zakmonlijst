@@ -12,11 +12,16 @@ ApplicationWindow
 
     // CoverMode: pokémon:
     property var coverPokémon
+    signal pokémonLoaded(var pokémon)
 
     // Models
     ListModel {
         id: pokémonList
         //dynamicRoles: true;
+    }
+
+    ListModel {
+        id: pokédex
     }
 
     ListModel {
@@ -50,7 +55,9 @@ ApplicationWindow
     Python {
         id: pokéApi
         function loadList() {}
-        function requestPokémon(id) {}
+        function requestPokémon(id, callback) {
+            call("PokéApi.fetchPokémon", [id], callback);
+        }
         function requestPokémonDescription(id, callback) {
             call("PokéApi.fetchPokémonDescription", [id, 18], callback);
         }
