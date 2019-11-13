@@ -6,8 +6,8 @@ import ".."
 Column {
     id: evolution
     property var pokémon
-    property var prevolution: if(pokémon) pokémon.evolutions.prevolution
-    property var evolutions: if(pokémon) pokémon.evolutions.evolutions
+    property var _prevolution: if(pokémon) pokémon.evolutions.prevolution
+    property var _evolutions: if(pokémon) pokémon.evolutions.evolutions
     topPadding: Theme.paddingMedium
     bottomPadding: Theme.paddingMedium
 
@@ -15,7 +15,7 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         text: qsTr("This pokémon has no evolutions")
         color: Theme.highlightColor
-        visible: pokémon != null && !prevolution && (!evolutions || evolutions.length === 0)
+        visible: pokémon != null && !_prevolution && (!_evolutions || _evolutions.length === 0)
     }
 
     BusyIndicator {
@@ -25,14 +25,14 @@ Column {
     }
 
     EvolutionPart {
-        visible: prevolution !== undefined
-        from: prevolution
+        visible: _prevolution !== undefined
+        from: _prevolution
         to: pokémon
-        evolution: prevolution.evolution
+        evolution: _prevolution.evolution
     }
 
     Repeater {
-        model: evolutions
+        model: _evolutions
         delegate: EvolutionPart {
             from: pokémon
             to: model.modelData
