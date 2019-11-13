@@ -1,12 +1,14 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0;
+
+import ".."
 
 Page {
     id: pokémonListPage
     anchors.fill: parent
     SilicaListView {
         anchors.fill: parent;
-        model: pokémonList
+        model: PokéApi.pokédexModel
         header: PageHeader {
             title: qsTr("Pokémon List")
         }
@@ -37,9 +39,7 @@ Page {
                 text: model.name
             }
 
-            onClicked: pageStack.push(Qt.resolvedUrl("PokémonPage.qml"), {
-                                          "pokémon": pokémonList.get(model.index),
-                                      })
+            onClicked: pageStack.push(Qt.resolvedUrl("PokémonPage.qml"), {"pokémonId": model.id})
         }
         VerticalScrollDecorator {}
     }
@@ -50,14 +50,18 @@ Page {
             window.coverMode = "default";
             break;
         case PageStatus.Active:
-            pageStack.pushAttached(Qt.resolvedUrl("PokédexPage.qml"))
+            pageStack.pushAttached(Qt.resolvedUrl("PokédexPage.qml"), {
+                                       "pokédexModel": PokéApi.pokédexesModel,
+                                       "changeFunction": PokéApi.loadPokédex,
+                                       "currentPokédex": PokéApi.pokédexIndex
+                                   })
             break;
         }
     }
 
     BusyIndicator {
         anchors.centerIn: parent
-        running: pokémonList.count == 0
+        running: PokéApi.pokédexModel.count === 0
         size: BusyIndicatorSize.Large
     }
 }

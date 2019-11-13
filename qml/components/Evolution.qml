@@ -1,11 +1,13 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 
+import ".."
+
 Column {
     id: evolution
     property var pokémon
-    property var prevolution
-    property var evolutions
+    property var prevolution: if(pokémon) pokémon.evolutions.prevolution
+    property var evolutions: if(pokémon) pokémon.evolutions.evolutions
     topPadding: Theme.paddingMedium
     bottomPadding: Theme.paddingMedium
 
@@ -13,7 +15,13 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         text: qsTr("This pokémon has no evolutions")
         color: Theme.highlightColor
-        visible: prevolution === null && evolutions.count === 0
+        visible: pokémon != null && !prevolution && (!evolutions || evolutions.length === 0)
+    }
+
+    BusyIndicator {
+        running: !pokémon
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: running
     }
 
     EvolutionPart {
@@ -30,15 +38,5 @@ Column {
             to: model.modelData
             evolution: model.modelData.evolution
         }
-    }
-
-    Component.onCompleted: {
-        pokéApi.requestPokémonEvolution(pokémon.id, function(result) {
-            console.log(JSON.stringify(result))
-            if (result.prevolution !== null) {
-                evolution.prevolution = result.prevolution
-            }
-            evolution.evolutions = result.evolutions
-        })
     }
 }

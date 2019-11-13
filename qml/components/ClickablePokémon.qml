@@ -1,11 +1,13 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import ".."
 
 BackgroundItem {
     property var pokémon
     id: background
     width: pokémonContainer.width
     height: pokémonContainer.height
+
     Item {
         id: pokémonContainer
         height: pokémonImg.height + pokémonName.height + Theme.paddingSmall
@@ -18,20 +20,18 @@ BackgroundItem {
             anchors.top: parent.top
             height: 256
             width: height
-            source: "../sprites/" + pokémon.id + ".png"
+            source: pokémon ? "../sprites/" + pokémon.id + ".png" : "image://theme/icon-m-question"
         }
         Label {
             id: pokémonName
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: pokémonImg.bottom
             anchors.topMargin: Theme.paddingSmall
-            text: pokémon.name
+            text: pokémon ? pokémon.name : qsTr("loading")
         }
     }
     onClicked: {
-        pokéApi.requestPokémon(pokémon.id, function(newPokémon) {
-            pageStack.push(Qt.resolvedUrl("../pages/PokémonPage.qml"),
-                           { "pokémon": newPokémon })
-        })
+        pageStack.push(Qt.resolvedUrl("../pages/PokémonPage.qml"),
+                       { "pokémonId": pokémon.id })
     }
 }

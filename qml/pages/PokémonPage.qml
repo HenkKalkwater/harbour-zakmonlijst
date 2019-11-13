@@ -1,12 +1,15 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 
+// Load the PokéApi
+import ".."
 import "../components"
 
 Page {
     id: pokémonPage
     anchors.fill: parent
 
+    property int pokémonId: 1
     property variant pokémon
     //property ListElement pokémon: undefined
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -16,6 +19,7 @@ Page {
         anchors.fill: parent
         contentHeight: content.height
 
+
         VerticalScrollDecorator {}
 
         Column {
@@ -24,7 +28,7 @@ Page {
             spacing: Theme.paddingLarge
 
             PageHeader {
-                title: pokémon.name
+                title: pokémon ? pokémon.name : qsTr("Loading")
                 Label {
                     id: genusLabel
                     width: parent.width - parent.leftMargin - parent.rightMargin
@@ -33,7 +37,7 @@ Page {
                         right: parent.right
                         rightMargin: parent.rightMargin
                     }
-                    text: pokémon.genus
+                    text: pokémon ? pokémon.genus : ""
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.highlightColor
                     opacity: 0.8
@@ -49,10 +53,11 @@ Page {
                 leftPadding: Theme.horizontalPageMargin
                 rightPadding: Theme.horizontalPageMargin
 
-                Image {
+                PokémonPicture {
                     id: pokéPic
-                    source: Qt.resolvedUrl("../sprites/" + pokémon.id + ".png")
+                    //source: if (pokémon) Qt.resolvedUrl("../sprites/" + pokémon.id + ".png")
                     height: width
+                    no: pokémon.id
                     fillMode: Image.PreserveAspectFit
                     width: parent.width / 2 - 2 * parent.leftPadding
                 }
@@ -64,20 +69,20 @@ Page {
                         Repeater {
                             model: pokémon.types
                             TypeBadge {
-                                typeAbbr: typesList.map[model.id].identifier
-                                typeName: typesList.map[model.id].name
+                                typeAbbr: modelData.identifier
+                                typeName: modelData.name
                             }
                         }
                     }
 
                     DetailItem {
                         label: qsTr("Height")
-                        value: (parseInt(pokémon.height) / 10) + " m";
+                        value: pokémon ? (parseInt(pokémon.height) / 10) + "m" : qsTr("??? m")
                     }
 
                     DetailItem {
                         label: qsTr("Weight")
-                        value: (parseInt(pokémon.weight) / 10) + " kg"
+                        value: pokémon ? (parseInt(pokémon.weight) / 10) + " kg" : qsTr("??? kg")
                     }
                 }
             }
@@ -96,12 +101,16 @@ Page {
                 anchors.right: parent.right
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color: Theme.highlightColor
-
-                Component.onCompleted: {
-                    pokéApi.requestPokémonDescription(pokémon.id, function(response) {
-                        // Replace newlines and let QT wrap things automatically
-                        text = response.replace(/\n/g, " ")
-                    })
+                text: {
+                    if (pokémon) {
+                        if (pokémon.description) {
+                            return pokémon.description.replace("/\n/g", " ")
+                        } else {
+                            return qsTr("This Pokémon does not have a description for this game.")
+                        }
+                    } else {
+                        return ""
+                    }
                 }
 
                 BusyIndicator {
@@ -133,10 +142,30 @@ Page {
         }
     }
     onStatusChanged: {
-        if (status === PageStatus.Activating) {
+        if (status === PageStatus.Active && pokémon) {
             window.coverMode = "pokémon"
             window.coverPokémon = pokémon
         }
     }
-    Component.onCompleted: if(!pokémon.expanded) pokéApi.requestPokémon(pokémon.id)
+
+    Connections {
+        target: PokéApi
+        onPokémonLoaded: {
+            if (id === pokémonId) {
+                pokémonPage.pokémon = pokémon
+                window.coverMode = "pokémon"
+                window.coverPokémon = pokémon
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        //PokéApi.requestPokémon(pokémonId)
+    }
+
+    Timer {
+        running: true
+        onTriggered: PokéApi.requestPokémon(pokémonId)
+        interval: 1000
+    }
 }

@@ -1,8 +1,14 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
+
+import ".."
 
 Page {
     id: pokédexPage
+    property ListModel pokédexModel
+    property int currentPokédex
+    property var changeFunction
+
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: content.height
@@ -14,26 +20,25 @@ Page {
             }
 
             ComboBox {
+                label: qsTr("Game")
+            }
+
+            ComboBox {
                 label: qsTr("Pokédex")
                 menu: ContextMenu {
+                    id: pokédexContextMenu
                     Repeater {
-                        model: pokédexesList
+                        model: pokédexModel
                         MenuItem {
                             text: model.name
                         }
                     }
                 }
-                description: pokédexesList.get(currentIndex).description
-                onCurrentIndexChanged: window.currentPokédex = pokédexesList.get(currentIndex).id
-                Component.onCompleted: {
-                    for (var i = 0; i < pokédexesList.count; i++) {
-                        if (pokédexesList.get(i).id === currentPokédex) {
-                            currentIndex = i
-                        }
-                    }
-                }
+                currentIndex: currentPokédex
+                onCurrentIndexChanged: changeFunction(currentIndex)
+                description: pokédexModel.get(currentIndex).description || qsTr("Still loading")
+                //onCurrentIndexChanged: window.currentPokédex = PokéApi.pokédexesModel.get(currentIndex).id
             }
-
         }
     }
 }

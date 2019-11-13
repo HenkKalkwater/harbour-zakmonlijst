@@ -27,8 +27,8 @@ CoverBackground {
             Repeater {
                 model: window.coverPokémon.types
                 TypeBadge {
-                    typeAbbr: typesList.map[model.id].identifier
-                    typeName: typesList.map[model.id].name
+                    typeAbbr: modelData.identifier
+                    typeName: modelData.name
                 }
             }
         }

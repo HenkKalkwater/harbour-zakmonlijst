@@ -6,11 +6,21 @@ import pyotherside
 import locale
 import os
 import time
+import threading
 
 # Setup sqlite
 #TODO: remove hardcoded path
-con = sqlite3.connect("/usr/share/harbour-zakmonlijst/qml/data/database.sqlite");
-con.row_factory = sqlite3.Row
+# We're never writing to the DB, so check_same_thread is unneeded.
+cons = {}
+
+def create_con():
+    global cons
+    ident = threading.get_ident()
+    if not ident in cons:
+        con = sqlite3.connect("/usr/share/harbour-zakmonlijst/qml/data/database.sqlite", 5.0, 0, None, False);
+        con.row_factory = sqlite3.Row
+        cons[ident] = con
+    return cons[ident]
 
 def log(message):
     pyotherside.send("LOG", str(message))
@@ -32,21 +42,26 @@ CONFIG_PATH = os.environ.get("HOME") + "/.config/harbour-zakmonlijst/config.cfg"
 pokédex = 1
 game = 30
 generation = 8
+typeMap = {}
 
-def fetchPokémonDescription(id, gameId):
+def fetchPokémonDescription(id):
     global preferred_language_id
-    c = con.cursor()
+    global game
+    c = create_con().cursor()
     c.execute('''SELECT psft.flavor_text
                  FROM pokemon_species_flavor_text AS psft
                  WHERE psft.species_id = ?
                        AND psft.version_id = ?
-                       AND psft.language_id = ?''', (id, gameId, preferred_language_id))
-    return c.fetchone()["flavor_text"]
+                       AND psft.language_id = ?''', (id, game, preferred_language_id))
+    row = c.fetchone()
+    if row is None:
+        return None
+    return row["flavor_text"]
 
 def fetchPokémon(id):
     global pokédex
     global preferred_language_id
-    c = con.cursor()
+    c = create_con().cursor()
     c.execute('''SELECT ps.id, psn.name, psn.genus, p.weight, p.height, GROUP_CONCAT(pt.type_id) AS types
                  FROM pokemon_species AS ps
                  JOIN pokemon_species_names AS psn ON ps.id = psn.pokemon_species_id
@@ -60,7 +75,11 @@ def fetchPokémon(id):
     typesTmp = row["types"].split(',')
     types = []
     for type in typesTmp:
-        types.append({"id": int(type)})
+        types.append(typeMap[int(type)])
+
+    description = fetchPokémonDescription(id)
+    evolutions = fetchEvolutionChain(id)
+
     return {
         # "index": row["id"],
         "id": row["id"],
@@ -68,14 +87,17 @@ def fetchPokémon(id):
         "genus": row["genus"],
         "weight": row["weight"],
         "height": row["height"],
-        "types": types
+        "types": types,
+        "description": description,
+        "evolutions": evolutions
+
     }
 
 
 def loadPokédex(id):
     global pokédex
     global preferred_language_id
-    c = con.cursor()
+    c = create_con().cursor()
     c.execute('''SELECT pdn.pokedex_number, ps.id, psn.name, psn.genus, p.weight, p.height, GROUP_CONCAT(pt.type_id) AS types
                  FROM pokemon_dex_numbers AS pdn
                  JOIN pokemon_species AS ps ON pdn.species_id = ps.id
@@ -86,14 +108,14 @@ def loadPokédex(id):
                  WHERE pdn.pokedex_id=?
                  GROUP BY ps.id
                  ORDER BY pdn.pokedex_number ASC, pt.slot ASC''', (preferred_language_id, id));
-    pyotherside.send("POKÉMON_MODEL_RESET")
+    result = []
     i = 0
     for row in c.fetchall():
         typesTmp = row["types"].split(',')
         types = []
         for type in typesTmp:
-            types.append({"id": int(type)})
-        pyotherside.send("POKÉMON_MODEL_SET", {
+            types.append(typeMap[int(type)])
+        result.append({
             # "index": row["id"],
             "index": i,
             "id": row["id"],
@@ -105,8 +127,8 @@ def loadPokédex(id):
             "types": types
         });
         i += 1
-    pyotherside.send("POKÉDEX_LOADED", id)
     pokédex = id
+    return result
 
 def createEvolutionObject(row):
     return {
@@ -126,7 +148,7 @@ def fetchEvolutionChain(id):
     SELECT_STRING = '''SELECT ps.id AS pre_id, psn.name AS pre_name,
     pe.minimum_level AS ev_lvl, etp.name AS ev_desc, et.identifier AS ev_name, pe.minimum_happiness AS ev_happiness,
     pe.time_of_day AS ev_time'''
-    c = con.cursor()
+    c = create_con().cursor()
     # Select pre-evolutions
     c.execute(SELECT_STRING + ''' FROM pokemon_evolution AS pe
                 JOIN pokemon_species AS ps ON ps.id = (SELECT evolves_from_species_id FROM pokemon_species WHERE pe.evolved_species_id = id)
@@ -153,13 +175,13 @@ def fetchEvolutionChain(id):
     ''', (preferred_language_id, preferred_language_id, id))
     for row in c.fetchall():
         result["evolutions"].append(createEvolutionObject(row))
-    log(result)
     return result
 
 def initialise():
     global preferred_languages
     global preferred_language_id
     global game
+    global typeMap
     global pokédex
 
     config = configparser.ConfigParser()
@@ -168,7 +190,7 @@ def initialise():
     pokédex = int(config["DEFAULT"].get("pokédex", "1"))
 
     # Try to find the preferred user language
-    c = con.cursor();
+    c = create_con().cursor();
     for language in preferred_languages:
         c.execute('''SELECT id
                      FROM languages
@@ -185,20 +207,21 @@ def initialise():
     # Send the types to QML
     i = 0
     for row in c.fetchall():
-        pyotherside.send("TYPES_MODEL_SET", {
+        typeMap[row["id"]] = {
                 "index": i,
                 "id": row["id"],
                 "identifier": row["identifier"],
                 "name": row["name"]
-        })
+        }
         i += 1
     # And the pokédexes
     c.execute('''SELECT pokedex_id AS id, name, description
                  FROM pokedex_prose
                  WHERE local_language_id=?''', (preferred_language_id,))
     i = 0
+    pokédexes = []
     for row in c.fetchall():
-        pyotherside.send("POKÉDEXES_MODEL_SET", {
+        pokédexes.append({
                 "index": i,
                 "id": row["id"],
                 "name": row["name"],
@@ -207,7 +230,7 @@ def initialise():
         i += 1
     pyotherside.send("POKÉDEX_SELECT", pokédex)
     log(f"preferred_language_id: {preferred_language_id}")
-    loadPokédex(pokédex) #1: hardcoded reference to the national dex
+    return (loadPokédex(pokédex), pokédexes) #1: hardcoded reference to the national dex
 
 def saveBeforeExit():
     global CONFIG_PATH

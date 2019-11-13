@@ -2,6 +2,13 @@
 <!DOCTYPE TS>
 <TS version="2.1">
 <context>
+    <name>ClickablePokémon</name>
+    <message>
+        <source>loading</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CoverPage</name>
     <message>
         <source>Pokédex</source>
@@ -71,6 +78,14 @@
         <source>Pokédex</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Still loading</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PokémonListPage</name>
@@ -99,6 +114,22 @@
     </message>
     <message>
         <source>Moves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Loading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>??? m</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>??? kg</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This Pokémon does not have a description for this game.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
