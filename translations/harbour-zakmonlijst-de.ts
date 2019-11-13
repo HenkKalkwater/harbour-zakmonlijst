@@ -86,6 +86,10 @@
         <source>Still loading</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>The selected game will influence the Pokémon descriptions, locations etc</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PokémonListPage</name>

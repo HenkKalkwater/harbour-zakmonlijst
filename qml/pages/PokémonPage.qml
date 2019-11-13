@@ -160,12 +160,12 @@ Page {
     }
 
     Component.onCompleted: {
-        //PokéApi.requestPokémon(pokémonId)
+        PokéApi.requestPokémon(pokémonId)
     }
 
-    Timer {
+    /*Timer {
         running: true
         onTriggered: PokéApi.requestPokémon(pokémonId)
         interval: 1000
-    }
+    }*/
 }

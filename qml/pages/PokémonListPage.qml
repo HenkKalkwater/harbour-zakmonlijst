@@ -50,10 +50,14 @@ Page {
             window.coverMode = "default";
             break;
         case PageStatus.Active:
+            // QML has some weird bugs
             pageStack.pushAttached(Qt.resolvedUrl("PokédexPage.qml"), {
                                        "pokédexModel": PokéApi.pokédexesModel,
-                                       "changeFunction": PokéApi.loadPokédex,
-                                       "currentPokédex": PokéApi.pokédexIndex
+                                       "changePokédex": PokéApi.loadPokédex,
+                                       "currentPokédex": PokéApi.pokédexIndex,
+                                       "gamesModel": PokéApi.gamesModel,
+                                       "changeGame": PokéApi.setGame,
+                                       "currentGame": PokéApi.gameIndex
                                    })
             break;
         }

@@ -7,7 +7,10 @@ Page {
     id: pokédexPage
     property ListModel pokédexModel
     property int currentPokédex
-    property var changeFunction
+    property var changePokédex
+    property ListModel gamesModel
+    property int currentGame
+    property var changeGame
 
     SilicaFlickable {
         anchors.fill: parent
@@ -21,6 +24,18 @@ Page {
 
             ComboBox {
                 label: qsTr("Game")
+                menu: ContextMenu {
+                    id: gamesContextMenu
+                    Repeater {
+                        model: gamesModel
+                        MenuItem {
+                            text: model.name
+                        }
+                    }
+                }
+                description: qsTr("The selected game will influence the Pokémon descriptions, locations etc")
+                currentIndex: currentGame
+                onCurrentIndexChanged: changeGame(currentIndex)
             }
 
             ComboBox {
@@ -35,7 +50,7 @@ Page {
                     }
                 }
                 currentIndex: currentPokédex
-                onCurrentIndexChanged: changeFunction(currentIndex)
+                onCurrentIndexChanged: changePokédex(currentIndex)
                 description: pokédexModel.get(currentIndex).description || qsTr("Still loading")
                 //onCurrentIndexChanged: window.currentPokédex = PokéApi.pokédexesModel.get(currentIndex).id
             }

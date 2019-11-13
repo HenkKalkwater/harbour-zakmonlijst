@@ -37,7 +37,8 @@ preferred_languages = {preferred_language, "en"}
 preferred_language_id = 9
 
 # CONFIG_PATH = os.environ.get("XDG_CONFIG_HOME") + "/harbour-zakmonlijst/config.cfg"
-CONFIG_PATH = os.environ.get("HOME") + "/.config/harbour-zakmonlijst/config.cfg"
+CONFIG_DIR = os.environ.get("HOME") + "/.config/harbour-zakmonlijst/"
+CONFIG_PATH = CONFIG_DIR + "config.cfg"
 
 pokédex = 1
 game = 30
@@ -93,6 +94,11 @@ def fetchPokémon(id):
 
     }
 
+def setGame(id):
+    global game
+    game = int(id)
+    log(f"Game set to {game}")
+    save()
 
 def loadPokédex(id):
     global pokédex
@@ -127,7 +133,8 @@ def loadPokédex(id):
             "types": types
         });
         i += 1
-    pokédex = id
+    pokédex = int(id)
+    save()
     return result
 
 def createEvolutionObject(row):
@@ -229,14 +236,38 @@ def initialise():
         })
         i += 1
     pyotherside.send("POKÉDEX_SELECT", pokédex)
+
+    # And the games
+    c.execute('''SELECT v.id, vn.name, vg.generation_id
+                FROM versions AS v
+                JOIN version_names AS vn ON vn.version_id = v.id
+                JOIN version_groups AS vg ON vg.id = v.version_group_id
+                WHERE vn.local_language_id = ?''', (preferred_language_id,))
+    i = 0
+    games = []
+    for row in c.fetchall():
+        games.append({
+            "index": i,
+            "id": row["id"],
+            "generation": row["generation_id"],
+            "name": row["name"]
+        })
+
     log(f"preferred_language_id: {preferred_language_id}")
-    return (loadPokédex(pokédex), pokédexes) #1: hardcoded reference to the national dex
+    return (loadPokédex(pokédex), pokédexes, pokédex, games, game) #1: hardcoded reference to the national dex
+
+def save():
+    pass
+    # saveBeforeExit()
 
 def saveBeforeExit():
     global CONFIG_PATH
     global game
     global pokédex
     log("Exiting...")
+    if not os.path.exists(CONFIG_DIR):
+        os.makedirs(CONFIG_DIR)
+
     config = configparser.ConfigParser()
     config["DEFAULT"] = {
         "game": game,
