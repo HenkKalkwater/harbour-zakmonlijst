@@ -26,6 +26,7 @@ Item {
     }
 
     function loadPokédex(idx) {
+        if (pokédexIndex === idx) return;
         pokédexIndex = idx
         var id = pokédexesModel.get(idx).id
         console.debug("Loading Pokédex " + id)
@@ -38,6 +39,7 @@ Item {
     }
 
     function setGame(idx) {
+        if (gameIndex === idx) return;
         gameIndex = idx
         var id = gamesModel.get(idx).id
         otherSide.call("PokéApi.setGame", [id], function(){})

@@ -57,7 +57,7 @@ Page {
                     id: pokéPic
                     //source: if (pokémon) Qt.resolvedUrl("../sprites/" + pokémon.id + ".png")
                     height: width
-                    no: pokémon.id
+                    no: pokémon ? pokémon.id : -1
                     fillMode: Image.PreserveAspectFit
                     width: parent.width / 2 - 2 * parent.leftPadding
                 }
@@ -67,7 +67,7 @@ Page {
                     Row {
                         anchors.horizontalCenter: parent.horizontalCenter
                         Repeater {
-                            model: pokémon.types
+                            model: pokémon ? pokémon.types : 0
                             TypeBadge {
                                 typeAbbr: modelData.identifier
                                 typeName: modelData.name
@@ -133,8 +133,13 @@ Page {
                 ExpandingSection {
                     title: qsTr("Moves")
                     content.sourceComponent: Column {
-                        Label {
-                            text: "Also TODO"
+                        spacing: Theme.paddingMedium
+                        SectionHeader {
+                            text: qsTr("Learned by leveling up")
+                        }
+                        MoveList {
+                          width: parent.width
+                          model: pokémonPage.pokémon.moves.levelUp
                         }
                     }
                 }

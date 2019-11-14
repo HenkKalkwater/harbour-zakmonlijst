@@ -52,6 +52,10 @@
         <extracomment>The time an evolution should occur</extracomment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Unknown method</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FirstPage</name>
@@ -66,6 +70,33 @@
     <message>
         <source>Hello Sailors</source>
         <translation>Hallo Matrosen</translation>
+    </message>
+</context>
+<context>
+    <name>MoveList</name>
+    <message>
+        <source>Lv.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pwr</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -134,6 +165,10 @@
     </message>
     <message>
         <source>This Pokémon does not have a description for this game.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Learned by leveling up</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

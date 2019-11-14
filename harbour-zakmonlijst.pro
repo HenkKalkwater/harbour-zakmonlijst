@@ -39,7 +39,8 @@ DISTFILES += qml/harbour-zakmonlijst.qml \
     qml/components/EvolutionPart.qml \
     qml/PokéApi.qml \
     qml/qmldir \
-    qml/components/PokémonPicture.qml
+    qml/components/PokémonPicture.qml \
+    qml/components/MoveList.qml
     qml/sprites/*.png
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172

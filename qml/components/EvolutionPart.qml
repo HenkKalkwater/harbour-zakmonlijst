@@ -32,6 +32,7 @@ Item {
         }
         Label {
             text: {
+                if (!evolution) return qsTr("Unknown method")
                 var additionalRequirements = []
                 if (evolution.happiness !== "") {
                     additionalRequirements.push(qsTr("with happiness > %1").arg(evolution.happiness))

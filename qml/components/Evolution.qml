@@ -28,7 +28,7 @@ Column {
         visible: _prevolution !== undefined
         from: _prevolution
         to: pokémon
-        evolution: _prevolution.evolution
+        evolution: _prevolution ? _prevolution.evolution : null
     }
 
     Repeater {

@@ -42,8 +42,10 @@ CONFIG_PATH = CONFIG_DIR + "config.cfg"
 
 pokédex = 1
 game = 30
+version_group_id = 1
 generation = 8
 typeMap = {}
+gameMap = {}
 
 def fetchPokémonDescription(id):
     global preferred_language_id
@@ -58,6 +60,30 @@ def fetchPokémonDescription(id):
     if row is None:
         return None
     return row["flavor_text"]
+
+def fetchPokémonMoves(id):
+    global preferred_language_id
+    global game
+    c = create_con().cursor()
+    c.execute('''SELECT pm.move_id, mn.name, pm.level, m.power, m.pp, m.type_id
+                 FROM pokemon_moves AS pm
+                 JOIN moves AS m ON m.id = pm.move_id
+                 JOIN move_names AS mn ON mn.move_id = m.id
+                 WHERE pm.pokemon_id = ? AND pm.version_group_id = ?
+                    AND mn.local_language_id = ? AND pm.pokemon_move_method_id = 1
+                 ORDER BY pm.level ASC, "pm.order" ASC''', (id, version_group_id, preferred_language_id))
+    levelUpMoves = []
+    for row in c.fetchall():
+        levelUpMoves.append({
+            "id": row["move_id"],
+            "name": row["name"],
+            "level": row["level"],
+            "power": row["power"],
+            "pp": row["pp"],
+            "type": typeMap[int(row["type_id"])]
+        })
+    result = {"levelUp": levelUpMoves}
+    return result
 
 def fetchPokémon(id):
     global pokédex
@@ -80,6 +106,7 @@ def fetchPokémon(id):
 
     description = fetchPokémonDescription(id)
     evolutions = fetchEvolutionChain(id)
+    moves = fetchPokémonMoves(id)
 
     return {
         # "index": row["id"],
@@ -90,7 +117,8 @@ def fetchPokémon(id):
         "height": row["height"],
         "types": types,
         "description": description,
-        "evolutions": evolutions
+        "evolutions": evolutions,
+        "moves": moves
 
     }
 
@@ -187,6 +215,7 @@ def fetchEvolutionChain(id):
 def initialise():
     global preferred_languages
     global preferred_language_id
+    global version_group_id
     global game
     global typeMap
     global pokédex
@@ -238,7 +267,7 @@ def initialise():
     pyotherside.send("POKÉDEX_SELECT", pokédex)
 
     # And the games
-    c.execute('''SELECT v.id, vn.name, vg.generation_id
+    c.execute('''SELECT v.id, vn.name, vg.generation_id, v.version_group_id
                 FROM versions AS v
                 JOIN version_names AS vn ON vn.version_id = v.id
                 JOIN version_groups AS vg ON vg.id = v.version_group_id
@@ -250,10 +279,14 @@ def initialise():
             "index": i,
             "id": row["id"],
             "generation": row["generation_id"],
-            "name": row["name"]
+            "name": row["name"],
+            "version_group_id": row["version_group_id"]
         })
+        gameMap[int(row["id"])] = games[-1]
 
+    version_group_id = gameMap[game]["version_group_id"]
     log(f"preferred_language_id: {preferred_language_id}")
+    log(f"version_group_id: {version_group_id}")
     return (loadPokédex(pokédex), pokédexes, pokédex, games, game) #1: hardcoded reference to the national dex
 
 def save():
