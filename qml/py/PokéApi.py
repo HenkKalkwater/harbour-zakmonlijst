@@ -17,7 +17,7 @@ def create_con():
     global cons
     ident = threading.get_ident()
     if not ident in cons:
-        con = sqlite3.connect("/usr/share/harbour-zakmonlijst/qml/data/database.sqlite", 5.0, 0, None, False);
+        con = sqlite3.connect("file:///usr/share/harbour-zakmonlijst/qml/data/database.sqlite?immutable=1", uri=True);
         con.row_factory = sqlite3.Row
         cons[ident] = con
     return cons[ident]
@@ -65,16 +65,24 @@ def fetchPokémonMoves(id):
     global preferred_language_id
     global game
     c = create_con().cursor()
-    c.execute('''SELECT pm.move_id, mn.name, pm.level, m.power, m.pp, m.type_id
+    result = {}
+    typeMoves = ["levelUp", "egg", "tutor", "machine", "stadiumSurfingPikachu", "lightBallEgg",
+        "colosseumPurification", "xdShadow", "xdPurification", "formChange"]
+    result = {}
+    for typeMove in typeMoves:
+        result[typeMove] = []
+
+    c.execute('''SELECT pm.move_id, mn.name, pm.level, m.power, m.pp, m.type_id, pm.pokemon_move_method_id AS move_method
                  FROM pokemon_moves AS pm
                  JOIN moves AS m ON m.id = pm.move_id
                  JOIN move_names AS mn ON mn.move_id = m.id
                  WHERE pm.pokemon_id = ? AND pm.version_group_id = ?
-                    AND mn.local_language_id = ? AND pm.pokemon_move_method_id = 1
+                    AND mn.local_language_id = ?
                  ORDER BY pm.level ASC, "pm.order" ASC''', (id, version_group_id, preferred_language_id))
-    levelUpMoves = []
+
     for row in c.fetchall():
-        levelUpMoves.append({
+        moveType = typeMoves[int(row["move_method"]) - 1]
+        result[moveType].append({
             "id": row["move_id"],
             "name": row["name"],
             "level": row["level"],
@@ -82,7 +90,7 @@ def fetchPokémonMoves(id):
             "pp": row["pp"],
             "type": typeMap[int(row["type_id"])]
         })
-    result = {"levelUp": levelUpMoves}
+    log(result)
     return result
 
 def fetchPokémon(id):

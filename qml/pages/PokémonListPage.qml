@@ -2,48 +2,35 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0;
 
 import ".."
+import "../components"
 
 Page {
     id: pokémonListPage
-    anchors.fill: parent
-    SilicaListView {
-        anchors.fill: parent;
-        model: PokéApi.pokédexModel
-        header: PageHeader {
-            title: qsTr("Pokémon List")
-        }
-        delegate: ListItem {
-            Image {
-                id: sprite
-                anchors.left: parent.left
-                anchors.leftMargin: Theme.horizontalPageMargin
-                anchors.topMargin: Theme.paddingMedium
-                anchors.bottomMargin: Theme.paddingMedium
-                anchors.verticalCenter: parent.verticalCenter
-                height: parent.height - anchors.topMargin * 2
-                width: height
-                fillMode: Image.PreserveAspectFit
-                source: Qt.resolvedUrl("../sprites/" + model.id + ".png")
-                BusyIndicator {
-                    anchors.centerIn: parent
-                    running: sprite.status != Image.Ready
-                    size: BusyIndicatorSize.ExtraSmall
-                }
-            }
-            Label {
-                anchors.left: sprite.right
-                anchors.leftMargin: Theme.paddingMedium
-                anchors.right: parent.right
-                anchors.rightMargin: Theme.horizontalPageMargin
-                anchors.verticalCenter: parent.verticalCenter
-                text: model.name
-            }
+    //anchors.fill: parent
+    allowedOrientations: Orientation.All
 
-            onClicked: pageStack.push(Qt.resolvedUrl("PokémonPage.qml"), {"pokémonId": model.id})
+    SilicaListView {
+        anchors.fill: parent
+        header: Column {
+            property alias searchActive: pokéSearch.active
+            width: parent.width
+            PageHeader {
+                title: qsTr("Pokémon List")
+            }
+            SearchField {
+                id: pokéSearch
+                width: parent.width
+                EnterKey.onClicked: Qt.inputMethod.hide()
+            }
+        }
+
+        cacheBuffer: Theme.paddingMedium * 5
+        model: PokéApi.pokédexModel
+        delegate: PokémonDelegate {
+            onPokémonClicked: pageStack.push(Qt.resolvedUrl("PokémonPage.qml"), {"pokémonId": model.id})
         }
         VerticalScrollDecorator {}
     }
-
     onStatusChanged: {
         switch(status) {
         case PageStatus.Activating:

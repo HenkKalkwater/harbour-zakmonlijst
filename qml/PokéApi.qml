@@ -4,8 +4,6 @@ import io.thp.pyotherside 1.4
 
 Item {
     id: api
-    // Contains all pokémon, in national dex order
-    readonly property ListModel pokémonModel: ListModel {}
     // The model that represents the Pokémon inside the currently selected Pokédex
     readonly property ListModel pokédexModel: ListModel {}
     // Contains the list of pokédexes
@@ -80,5 +78,10 @@ Item {
         }
     }
 
-    function initialise() { otherSide.initialise(); }
+    function initialise() {
+        pokédexModel.clear()
+        pokédexesModel.clear()
+        gamesModel.clear()
+        otherSide.initialise();
+    }
 }

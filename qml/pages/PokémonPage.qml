@@ -7,7 +7,6 @@ import "../components"
 
 Page {
     id: pokémonPage
-    anchors.fill: parent
 
     property int pokémonId: 1
     property variant pokémon
@@ -86,66 +85,86 @@ Page {
                     }
                 }
             }
-            SectionHeader {
-                text: qsTr("Description")
-            }
-            Label {
-                id: descriptionLabel
-                height: descriptionSpinner.running ? descriptionSpinner.height : implicitHeight;
-                Behavior on height {
-                    NumberAnimation { duration: 100 }
-                }
-                anchors.left: parent.left
-                anchors.leftMargin: Theme.horizontalPageMargin
-                anchors.rightMargin: Theme.horizontalPageMargin
-                anchors.right: parent.right
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: Theme.highlightColor
-                text: {
-                    if (pokémon) {
-                        if (pokémon.description) {
-                            return pokémon.description.replace("/\n/g", " ")
-                        } else {
-                            return qsTr("This Pokémon does not have a description for this game.")
+
+            ExpandingSectionGroup {
+                //currentIndex: 0
+                ExpandingSection {
+                    title: qsTr("Description")
+                    content.sourceComponent: Label {
+                        id: descriptionLabel
+                        height: descriptionSpinner.running ? descriptionSpinner.height : implicitHeight;
+                        Behavior on height {
+                            NumberAnimation { duration: 100 }
                         }
-                    } else {
-                        return ""
+                        anchors.left: parent.left
+                        anchors.leftMargin: Theme.horizontalPageMargin
+                        anchors.rightMargin: Theme.horizontalPageMargin
+                        anchors.right: parent.right
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        color: Theme.highlightColor
+                        text: {
+                            if (pokémon) {
+                                if (pokémon.description) {
+                                    return pokémon.description.replace("\n", " ")
+                                } else {
+                                    return qsTr("This Pokémon does not have a description for this game.")
+                                }
+                            } else {
+                                return ""
+                            }
+                        }
+
+                        BusyIndicator {
+                            id: descriptionSpinner
+                            anchors.centerIn: parent
+                            running: descriptionLabel.text.length == 0
+                            size: BusyIndicatorSize.Medium
+                        }
                     }
                 }
 
-                BusyIndicator {
-                    id: descriptionSpinner
-                    anchors.centerIn: parent
-                    running: descriptionLabel.text.length == 0
-                    size: BusyIndicatorSize.Medium
-                }
-            }
-
-            ExpandingSectionGroup {
-                currentIndex: 0
                 ExpandingSection {
+                    id: evolutionSection
                     title: qsTr("Evolution")
                     content.sourceComponent: Evolution {
-                            width: parent.width
-                            pokémon: pokémonPage.pokémon
+                        enabled: evolutionSection.expanded
+                        width: parent.width
+                        pokémon: pokémonPage.pokémon
                      }
                  }
                 ExpandingSection {
+                    id: moveSection
                     title: qsTr("Moves")
                     content.sourceComponent: Column {
+                        enabled: moveSection.expanded
                         spacing: Theme.paddingMedium
-                        SectionHeader {
-                            text: qsTr("Learned by leveling up")
-                        }
-                        MoveList {
-                          width: parent.width
-                          model: pokémonPage.pokémon.moves.levelUp
+                        Repeater {
+                            model: [
+                                {"id": "levelUp", "description": qsTr("Learned by leveling up")},
+                                {"id": "egg", "description": qsTr("Learnable via breeding")},
+                                {"id": "tutor", "description": qsTr("Learnable via NPCs")},
+                                {"id": "machine", "description": qsTr("Learnable via TMs and HMs")},
+                                {"id": "formChange", "description": qsTr("Learnable via form change")}
+                            ]
+                            Column {
+                                width: parent.width
+                                visible: pokémonPage.pokémon.moves[modelData.id].length > 0
+                                SectionHeader {
+                                    text: modelData.description
+                                }
+                                MoveList {
+                                  width: parent.width
+                                  model: pokémonPage.pokémon.moves[modelData.id]
+                                  showLvl: modelData.id == "levelUp"
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+
     onStatusChanged: {
         if (status === PageStatus.Active && pokémon) {
             window.coverMode = "pokémon"

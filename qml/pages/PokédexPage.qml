@@ -11,6 +11,7 @@ Page {
     property ListModel gamesModel
     property int currentGame
     property var changeGame
+    orientationTransitions: Orientation.All
 
     SilicaFlickable {
         anchors.fill: parent
